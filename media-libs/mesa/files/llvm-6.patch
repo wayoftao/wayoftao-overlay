@@ -1,0 +1,14 @@
+--- a/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp	2018-04-07 21:50:49.716430343 +0800
++++ b/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp	2018-04-07 22:00:31.056227042 +0800
+@@ -830,7 +830,11 @@
+       llvm::unwrap(builder)->setFastMathFlags(flags);
+       break;
+    case LP_FLOAT_MODE_UNSAFE_FP_MATH:
++#if  LLVM_VERSION_MAJOR >= 6
++      flags.setAllowReassoc();
++#else
+       flags.setUnsafeAlgebra();
++#endif
+       llvm::unwrap(builder)->setFastMathFlags(flags);
+       break;
+    }
