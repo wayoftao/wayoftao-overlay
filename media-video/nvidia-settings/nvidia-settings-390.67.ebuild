@@ -2,7 +2,7 @@
 
 EAPI=5
 
-inherit eutils multilib toolchain-funcs
+inherit eutils multilib
 
 DESCRIPTION="NVIDIA Linux X11 Settings Utility"
 HOMEPAGE="http://www.nvidia.com/"
