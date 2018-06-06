@@ -1,6 +1,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
 
 inherit eutils multilib
 
@@ -11,10 +11,10 @@ SRC_URI="https://download.nvidia.com/XFree86/${PN}/${P}.tar.bz2"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~x86 ~x86-fbsd"
-IUSE="dbus vdpau gtk3"
+IUSE="dbus doc gtk3 vdpau +system-jansson"
 
 RDEPEND="x11-drivers/nvidia-drivers
-        dev-libs/jansson
+        system-jansson? ( >=dev-libs/jansson-2.2 )
         x11-libs/gdk-pixbuf[X]
         x11-libs/libX11
         x11-libs/libXext
@@ -29,4 +29,14 @@ DEPEND="${RDEPEND}"
 
 src_prepare() {
     epatch "${FILESDIR}/nvidia-settings-gtk-independence.patch"
+    default
+}
+
+src_compile() {
+    emake NV_USE_BUNDLED_LIBJANSSON=$(use !system-jansson | echo $?)
+}
+
+src_install() {
+    emake DESTDIR="${D}" NV_USE_BUNDLED_LIBJANSSON=$(use !system-jansson | echo $?) install
+    use doc && einstalldocs
 }
