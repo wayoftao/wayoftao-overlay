@@ -10,7 +10,7 @@ DESCRIPTION="Human friendly BLAS and Lapack bindings for Haskell"
 HOMEPAGE="http://hackage.haskell.org/package/hblas"
 EGIT_REPO_URI="https://github.com/wellposed/hblas.git"
 
-LICENSE="BSD-3"
+LICENSE="BSD-2"
 SLOT="0"
 KEYWORDS=""
 IUSE=""
