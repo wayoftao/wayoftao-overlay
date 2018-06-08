@@ -15,7 +15,8 @@ SLOT="0"
 KEYWORDS=""
 IUSE=""
 
-DEPEND=">=dev-haskell/semigroups-0.9
+DEPEND=">=dev-haskell/loop-0.2
+		>=dev-haskell/semigroups-0.9
 		>=dev-haskell/vector-0.1.0
 		>=dev-haskell/primitive-0.5"
 RDEPEND="${DEPEND}
