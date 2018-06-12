@@ -39,7 +39,7 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +libglvnd +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
+	bindist +glvnd +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
 	+llvm +nptl opencl osmesa pax_kernel openmax pic selinux vaapi valgrind
 	vdpau vulkan wayland xvmc xa"
 
@@ -79,7 +79,7 @@ LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.89"
 # keep blocks in rdepend for binpkg
 RDEPEND="
 	!<x11-base/xorg-server-1.7
-	libglvnd? ( media-libs/libglvnd[${MULTILIB_USEDEP}] )
+	glvnd? ( media-libs/libglvnd[${MULTILIB_USEDEP}] )
 	classic? ( app-eselect/eselect-mesa )
 	gallium? ( app-eselect/eselect-mesa )
 	>=app-eselect/eselect-opengl-1.3.0
@@ -274,7 +274,6 @@ pkg_setup() {
 
 src_prepare() {
 	[[ ${PV} == 9999 ]] && eautoreconf
-	use libglvnd && epatch "${FILESDIR}/mesa-libglvnd-pkg-config.patch"
 	eapply_user
 }
 
@@ -392,7 +391,7 @@ multilib_src_configure() {
 		$(use_enable gles2) \
 		$(use_enable nptl glx-tls) \
 		$(use_enable unwind libunwind) \
-		$(use_enable libglvnd) \
+		$(use_enable glvnd libglvnd) \
 		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
 		--disable-opencl-icd \
