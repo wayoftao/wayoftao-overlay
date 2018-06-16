@@ -52,6 +52,6 @@ multilib_src_install() {
 	default
 	# libglvnd should replace existing Mesa gl if present
 	PKGCONF_PATH="${ED}/usr/$(get_libdir)/pkgconfig"
-	mv "${PKGCONF_PATH}/libglvnd.pc" "${PKGCONF_PATH}/gl.pc" || die
+	ln -fs "${PKGCONF_PATH}/libglvnd.pc" "${PKGCONF_PATH}/gl.pc" || die
 	find "${D}" -name '*.la' -delete || die
 }
