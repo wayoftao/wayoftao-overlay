@@ -4,7 +4,7 @@ EAPI=5
 
 PLOCALES="ar ca cs da de el en es fa fr hr hu it ja ko ms nb nl pl pt pt_BR ro ru sr sv tr zh_CN zh_TW"
 PLOCALE_BACKUP="en"
-WX_GTK_VER="3.0"
+WX_GTK_VER="3.1"
 
 inherit cmake-utils eutils l10n pax-utils toolchain-funcs versionator wxwidgets
 
@@ -23,7 +23,7 @@ HOMEPAGE="https://www.dolphin-emu.org/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="alsa ao bluetooth doc egl +evdev ffmpeg llvm log lto openal +pch portaudio profile pulseaudio qt5 sdl upnp +wxwidgets"
+IUSE="alsa ao bluetooth doc egl +evdev ffmpeg llvm log lto openal +pch profile pulseaudio qt5 sdl upnp +wxwidgets"
 
 RDEPEND=">=media-libs/libsfml-2.1
 	>net-libs/enet-1.3.7
@@ -50,9 +50,7 @@ RDEPEND=">=media-libs/libsfml-2.1
 	llvm? ( sys-devel/llvm )
 	openal? (
 			media-libs/openal
-			media-libs/libsoundtouch
 	)
-	portaudio? ( media-libs/portaudio )
 	profile? ( dev-util/oprofile )
 	pulseaudio? ( media-sound/pulseaudio )
 	qt5? (
@@ -70,6 +68,7 @@ RDEPEND=">=media-libs/libsfml-2.1
 	dev-libs/hidapi
 	"
 DEPEND="${RDEPEND}
+	dev-libs/pugixml
 	>=dev-util/cmake-2.8.8
 	>=sys-devel/gcc-4.9.0
 	app-arch/zip
@@ -79,7 +78,6 @@ DEPEND="${RDEPEND}
 	"
 
 pkg_pretend() {
-
 	local ver=4.9.0
 	local msg="${PN} needs at least GCC ${ver} set to compile."
 
@@ -89,54 +87,42 @@ pkg_pretend() {
 			die ${msg}
 		fi
 	fi
-
 }
 
 src_prepare() {
-
 	# Remove automatic dependencies to prevent building without flags enabled.
-	if use !alsa; then
-		sed -i -e '/include(FindALSA/d' CMakeLists.txt || die
-	fi
-	if use !ao; then
-		sed -i -e '/check_lib(AO/d' CMakeLists.txt || die
-	fi
-	if use !bluetooth; then
-		sed -i -e '/check_lib(BLUEZ/d' CMakeLists.txt || die
-	fi
-	if use !llvm; then
-		sed -i -e '/include(FindLLVM/d' CMakeLists.txt || die
-	fi
 	if use !openal; then
-		sed -i -e '/include(FindOpenAL/d' CMakeLists.txt || die
-	fi
-	if use !portaudio; then
-		sed -i -e '/CMAKE_REQUIRED_LIBRARIES portaudio/d' CMakeLists.txt || die
-	fi
-	if use !pulseaudio; then
-		sed -i -e '/check_lib(PULSEAUDIO/d' CMakeLists.txt || die
+		sed -i -e '/find_package(OpenAL)/d' Source/Core/AudioCommon/CMakeLists.txt || die
 	fi
 
 	# Remove ALL the bundled libraries, aside from:
-	# - SOIL: The sources are not public.
 	# - Bochs-disasm: Don't know what it is.
+	# - cpp-optparse: Same.
 	# - gtest: Their build set up solely relies on the build in gtest.
-	# - xxhash: Not on the tree.
-	mv Externals/SOIL . || die
+	# - cubeb: No idea.
+	# - soundtouch: Unable to use system soundtouch library: We require shorts, not floats.
+	# - glslang: No Findglslang.cmake available
+	# - xxhash: No FindXXHASH.cmake available
+	# - picojson: Header file only, no point in installing.
 	mv Externals/Bochs_disasm . || die
+	mv Externals/cpp-optparse . || die
 	mv Externals/gtest . || die
-	mv Externals/xxhash . || die
+	mv Externals/cubeb . || die
+	mv Externals/soundtouch . || die
 	mv Externals/glslang . || die
-	mv Externals/Vulkan . || die
-	mv Externals/wxWidgets3 . || die
-	#rm -r Externals/* || die "Failed to delete Externals dir."
+	mv Externals/xxhash . || die
+	mv Externals/picojson . || die
+
+	rm -r Externals/* || die "Failed to delete Externals dir."
+
 	mv Bochs_disasm Externals || die
-	mv SOIL Externals || die
+	mv cpp-optparse Externals || die
 	mv gtest Externals || die
-	mv xxhash Externals || die
+	mv cubeb Externals || die
+	mv soundtouch Externals || die
 	mv glslang Externals || die
-	mv Vulkan Externals || die
-	mv wxWidgets3 Externals || die
+	mv xxhash Externals || die
+	mv picojson Externals || die
 
 	remove_locale() {
 		# Ensure preservation of the backup locale when no valid LINGUA is set
@@ -152,22 +138,21 @@ src_prepare() {
 }
 
 src_configure() {
-
-	#if use wxwidgets; then
-	#	need-wxwidgets unicode
-	#fi
-
 	local mycmakeargs=(
 		"-DUSE_SHARED_ENET=ON"
 		$( cmake-utils_use ffmpeg ENCODE_FRAMEDUMPS )
 		$( cmake-utils_use log FASTLOG )
 		$( cmake-utils_use profile OPROFILING )
-		$( cmake-utils_use_disable wxwidgets WX )
+		$( cmake-utils_use_enable bluetooth BLUEZ )
+		$( cmake-utils_use_enable wxwidgets WX )
 		$( cmake-utils_use_enable evdev EVDEV )
+		$( cmake-utils_use_enable llvm LLVM )
 		$( cmake-utils_use_enable lto LTO )
 		$( cmake-utils_use_enable pch PCH )
 		$( cmake-utils_use_enable qt5 QT2 )
 		$( cmake-utils_use_enable sdl SDL )
+		$( cmake-utils_use_enable pulseaudio PULSEAUDIO )
+		$( cmake-utils_use_enable alsa ALSA )
 		$( cmake-utils_use_use egl EGL )
 		$( cmake-utils_use_use upnp UPNP )
 	)
@@ -196,9 +181,4 @@ src_install() {
 pkg_postinst() {
 	# Add pax markings for hardened systems
 	pax-mark -m "${EPREFIX}"/usr/games/bin/"${PN}"-emu
-
-	if ! use portaudio; then
-		ewarn "If you want microphone capabilities in dolphin-emu, rebuild with"
-		ewarn "USE=\"portaudio\""
-	fi
 }
