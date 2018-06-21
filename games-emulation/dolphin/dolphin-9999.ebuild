@@ -6,7 +6,7 @@ PLOCALES="ar ca cs da de el en es fa fr hr hu it ja ko ms nb nl pl pt pt_BR ro r
 PLOCALE_BACKUP="en"
 WX_GTK_VER="3.1"
 
-inherit cmake-utils eutils l10n pax-utils toolchain-funcs versionator wxwidgets
+inherit cmake-utils gnome2-utils l10n pax-utils toolchain-funcs versionator wxwidgets
 
 if [[ ${PV} == 9999* ]]
 then
@@ -160,12 +160,7 @@ src_configure() {
 	cmake-utils_src_configure
 }
 
-src_compile() {
-
-	cmake-utils_src_compile
-}
 src_install() {
-
 	cmake-utils_src_install
 
 	dodoc Readme.md
@@ -181,4 +176,10 @@ src_install() {
 pkg_postinst() {
 	# Add pax markings for hardened systems
 	pax-mark -m "${EPREFIX}"/usr/games/bin/"${PN}"-emu
+
+	gnome2_icon_cache_update
+}
+
+pkg_postrm() {
+	gnome2_icon_cache_update
 }
