@@ -18,7 +18,7 @@ if [[ ${PV} = 9999* ]]; then
 	SRC_URI=""
 else
 	KEYWORDS="~amd64"
-	COMMIT="8709003ffdc905d144855c3117a31da220149d4c"
+	COMMIT="9d909106f232209cf055428cae18387c18918704"
 	SRC_URI="https://github.com/NVIDIA/${PN}/archive/${COMMIT}.tar.gz -> ${P}.tar.gz"
 	S=${WORKDIR}/${PN}-${COMMIT}
 fi
