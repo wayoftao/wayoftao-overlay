@@ -9,7 +9,7 @@ LICENSE="GPL-2"
 KEYWORDS="alpha amd64 arm hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~x86-fbsd"
 IUSE="+abi_x86_32 +abi_x86_64"
 
-RDEPEND=""
+RDEPEND=">x11-base/xorg-proto-2014.4-r1"
 DEPEND="${RDEPEND}"
 SLOT="0"
 

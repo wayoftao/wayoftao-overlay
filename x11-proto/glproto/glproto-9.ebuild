@@ -8,7 +8,7 @@ KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86 ~
 LICENSE="SGI-B-2.0"
 IUSE="+abi_x86_32 +abi_x86_64"
 
-RDEPEND=""
+RDEPEND=">x11-base/xorg-proto-2014.4-r1"
 DEPEND=""
 SLOT="0"
 
