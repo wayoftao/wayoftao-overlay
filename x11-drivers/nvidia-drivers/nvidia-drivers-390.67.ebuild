@@ -18,9 +18,6 @@ NV_URI="http://us.download.nvidia.com/XFree86/"
 SRC_URI="
 	amd64-fbsd? ( ${NV_URI}FreeBSD-x86_64/${PV}/${AMD64_FBSD_NV_PACKAGE}.tar.gz )
 	amd64? ( ${NV_URI}Linux-x86_64/${PV}/${AMD64_NV_PACKAGE}.run )
-	tools? (
-		https://download.nvidia.com/XFree86/nvidia-settings/nvidia-settings-${PV}.tar.bz2
-	)
 "
 
 LICENSE="GPL-2 NVIDIA-r2"
@@ -30,16 +27,16 @@ RESTRICT="bindist mirror strip"
 EMULTILIB_PKG="true"
 
 NV_PKG_USE="+opengl +egl +gpgpu +nvpd +nvifr +nvfbc +nvcuvid +nvml +encodeapi +vdpau +xutils +xdriver"
-IUSE="+glvnd system-glvnd ${NV_PKG_USE} acpi compat +driver +opencl gtk3 kernel_FreeBSD kernel_linux +kms multilib pax_kernel static-libs +tools uvm wayland +X"
+IUSE="+glvnd system-glvnd ${NV_PKG_USE} acpi compat +driver gtk3 kernel_FreeBSD kernel_linux +kms multilib pax_kernel static-libs +tools uvm wayland +X"
 
 REQUIRED_USE="
 	tools? ( X )
 "
 
 COMMON="
-	opencl? (
-		app-eselect/eselect-opencl
-		dev-libs/ocl-icd
+	gpgpu? (
+			app-eselect/eselect-opencl
+			dev-libs/ocl-icd
 	)
 	kernel_linux? ( >=sys-libs/glibc-2.6.1 )
 	X? (
@@ -50,7 +47,6 @@ COMMON="
 DEPEND="
 	${COMMON}
 	kernel_linux? ( virtual/linux-sources )
-	tools? ( sys-apps/dbus )
 "
 RDEPEND="
 	${COMMON}
@@ -63,11 +59,8 @@ RDEPEND="
 		>=x11-libs/libvdpau-1.0[${MULTILIB_USEDEP}]
 		sys-libs/zlib[${MULTILIB_USEDEP}]
 	)
+	tools? ( media-video/nvidia-settings )
 "
-PDEPEND="tools? ( media-video/nvidia-settings )"
-
-
-
 
 QA_PREBUILT="opt/* usr/lib*"
 S=${WORKDIR}/
@@ -91,7 +84,7 @@ NV_X_MODDIR="xorg/modules"
 # Convert module names to use-flags as appropriate
 nv_use() {
 	local mymodule
-	case "$1" in 
+	case "$1" in
 		installer) return 0;;
 		compiler) mymodule="gpgpu" ;;
 		*) mymodule="$1" ;;
@@ -395,36 +388,10 @@ src_install() {
 		doexe "${S}/src/nvidia.ko"
 	fi
 
-
-	if use X; then
-		# Xorg DDX driver
-		insinto /usr/$(get_libdir)/xorg/modules/drivers
-		#doins ${NV_X11}/nvidia_drv.so
-
-		# Xorg GLX driver
-		#donvidia ${NV_X11}/libglx.so.${NV_SOVER} \
-		#	/usr/$(get_libdir)/opengl/nvidia/extensions
-
-		# Xorg nvidia.conf
-		if has_version '>=x11-base/xorg-server-1.16'; then
-			insinto /usr/share/X11/xorg.conf.d
-		#	newins {,50-}nvidia-drm-outputclass.conf
-		fi
-
-		insinto /usr/share/glvnd/egl_vendor.d
-		#doins ${NV_X11}/10_nvidia.json
-	fi
-
-	if use wayland; then
-		insinto /usr/share/egl/egl_external_platform.d
-		#doins ${NV_X11}/10_nvidia_wayland.json
-	fi
-
-	# OpenCL ICD for NVIDIA
-	if use kernel_linux; then
-		insinto /etc/OpenCL/vendors
-		#doins ${NV_OBJ}/nvidia.icd
-	fi
+	# if use wayland; then
+		# insinto /usr/share/egl/egl_external_platform.d
+		# doins ${NV_X11}/10_nvidia_wayland.json
+	# fi
 
 	# Documentation
 	#if use kernel_FreeBSD; then
@@ -447,12 +414,12 @@ src_install() {
 	# Helper Apps
 	exeinto ${NV_ROOT}/bin/
 
-	if use X; then
+	# if use X; then
 		#doexe ${NV_OBJ}/nvidia-xconfig
 
-		insinto /etc/vulkan/icd.d
-		doins nvidia_icd.json
-	fi
+	#	insinto /etc/vulkan/icd.d
+	#	doins nvidia_icd.json
+	# fi
 
 	if use kernel_linux; then
 		#doexe ${NV_OBJ}/nvidia-cuda-mps-control
@@ -461,7 +428,6 @@ src_install() {
 		#doexe ${NV_OBJ}/nvidia-persistenced
 		#doexe ${NV_OBJ}/nvidia-smi
 
-
 		#doman nvidia-cuda-mps-control.1
 		#doman nvidia-persistenced.1
 		newinitd "${FILESDIR}/nvidia-smi.init" nvidia-smi
@@ -469,30 +435,32 @@ src_install() {
 		newinitd "${FILESDIR}/nvidia-persistenced.init" nvidia-persistenced
 	fi
 
-	if use tools; then
-		insinto /usr/share/nvidia/
-		#doins nvidia-application-profiles-${PV}-key-documentation
+	# if use tools; then
+		# insinto /usr/share/nvidia/
+		# doins nvidia-application-profiles-${PV}-key-documentation
 
-		insinto /etc/nvidia
-		#newins \
+		# insinto /etc/nvidia
+		# newins \
 		#	nvidia-application-profiles-${PV}-rc nvidia-application-profiles-rc
 
 		# There is no icon in the FreeBSD tarball.
-		#use kernel_FreeBSD || \
+		# use kernel_FreeBSD || \
 		#	doicon ${NV_OBJ}/nvidia-settings.png
 
-		#domenu "${FILESDIR}"/nvidia-settings.desktop
+		# domenu "${FILESDIR}"/nvidia-settings.desktop
 
-		exeinto /etc/X11/xinit/xinitrc.d
-		#newexe "${FILESDIR}"/95-nvidia-settings-r1 95-nvidia-settings
-	fi
+		# exeinto /etc/X11/xinit/xinitrc.d
+		# newexe "${FILESDIR}"/95-nvidia-settings-r1 95-nvidia-settings
+	# fi
 
-	#dobin ${NV_OBJ}/nvidia-bug-report.sh
+	# dobin ${NV_OBJ}/nvidia-bug-report.sh
 
 
 	is_final_abi || die "failed to iterate through all ABIs"
 
 	readme.gentoo_create_doc
+
+	ln -rs "${ED}/${NV_ROOT}" "${ED}/${NV_ROOT%-*}"
 }
 
 
@@ -512,27 +480,27 @@ pkg_preinst() {
 pkg_postinst() {
 
 	# Switch to the nvidia implementation
-	use X && "${ROOT}"/usr/bin/eselect opengl set --use-old nvidia
-	use opencl && "${ROOT}"/usr/bin/eselect opencl set --use-old ocl-icd
+	use X && use !glvnd && "${ROOT}"/usr/bin/eselect opengl set --use-old nvidia
+	use gpgpu && "${ROOT}"/usr/bin/eselect opencl set --use-old ocl-icd
 
 	readme.gentoo_print_elog
 
 	if ! use X; then
-		elog "You have elected to not install the X.org driver. Along with"
-		elog "this the OpenGL libraries and VDPAU libraries were not"
-		elog "installed. Additionally, once the driver is loaded your card"
+		elog "You have elected to not install the X.org driver. This means"
+		elog "that the OpenGL libraries and VDPAU libraries were not"
+		elog "installed either. Additionally, once the driver is loaded your card"
 		elog "and fan will run at max speed which may not be desirable."
 		elog "Use the 'nvidia-smi' init script to have your card and fan"
 		elog "speed scale appropriately."
 		elog
 	fi
-	if ! use tools; then
-		elog "USE=tools controls whether the nvidia-settings application"
-		elog "is installed. If you would like to use it, enable that"
-		elog "flag and re-emerge this ebuild. Optionally you can install"
-		elog "media-video/nvidia-settings"
-		elog
-	fi
+	# if ! use tools; then
+	#	elog "USE=tools controls whether the nvidia-settings application"
+	#	elog "is installed. If you would like to use it, enable that"
+	#	elog "flag and re-emerge this ebuild. Optionally you can install"
+	#	elog "media-video/nvidia-settings"
+	#	elog
+	# fi
 }
 
 pkg_prerm() {

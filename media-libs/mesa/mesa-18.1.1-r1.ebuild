@@ -458,6 +458,7 @@ multilib_src_install() {
 	fi
 
 	find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
+	find "${ED}/usr/$(get_libdir)/pkgconfig/" -name 'gl.pc' -delete
 }
 
 multilib_src_install_all() {
