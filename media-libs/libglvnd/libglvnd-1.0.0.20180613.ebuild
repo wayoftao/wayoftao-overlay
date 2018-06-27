@@ -32,7 +32,9 @@ RDEPEND="
 	x11-libs/libX11[${MULTILIB_USEDEP}]
 	"
 DEPEND="${PYTHON_DEPS}
-	${RDEPEND}"
+	${RDEPEND}
+	>x11-base/xorg-proto-2018.4-r1
+	x11-libs/libXext"
 
 src_unpack() {
 	default
