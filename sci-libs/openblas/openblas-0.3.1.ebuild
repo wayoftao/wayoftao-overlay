@@ -41,6 +41,6 @@ src_install() {
 
 	if $(use cblas);  then
 		insinto /etc/env.d/cblas/$(get_libdir)
-		newins "${FILEDIR}/openblas.cblas.eselect.envd" "openblas"
+		newins "${FILESDIR}/openblas.cblas.eselect.envd" "openblas"
 	fi
 }
