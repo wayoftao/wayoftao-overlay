@@ -1,0 +1,2 @@
+/usr/@LIBDIR@/libopenblas.a /usr/@LIBDIR@/libcblas.a
+/usr/@LIBDIR@/pkgconfig/openblas.pc /usr/@LIBDIR@/pkgconfig/cblas.pc

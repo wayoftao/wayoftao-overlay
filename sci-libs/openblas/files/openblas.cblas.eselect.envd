@@ -1,5 +1,0 @@
-/opt/OpenBLAS/lib/libopenblas.so /usr/@LIBDIR@/libcblas.so
-/opt/OpenBLAS/lib/libopenblas.so.0 /usr/@LIBDIR@/libcblas.so.0
-/opt/OpenBLAS/lib/libopenblas.so.0 /usr/@LIBDIR@/libcblas.so.3
-/opt/OpenBLAS/lib/libblas.a /usr/@LIBDIR@/libcblas.a
-/opt/OpenBLAS/lib/pkgconfig/openblas.pc /usr/@LIBDIR@/pkgconfig/cblas.pc

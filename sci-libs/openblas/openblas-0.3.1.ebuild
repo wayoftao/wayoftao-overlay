@@ -13,7 +13,7 @@ SRC_URI="https://github.com/xianyi/OpenBLAS/archive/v${PV}.tar.gz"
 LICENSE="BSD-3"
 SLOT="0"
 KEYWORDS="*"
-IUSE="+cblas"
+IUSE="+cblas static"
 
 DEPEND="dev-util/cmake"
 RDEPEND="${DEPEND}"
@@ -28,6 +28,7 @@ src_test() {
 src_configure() {
 	local mycmakeargs=(
 		-DBUILD_WITHOUT_CBLAS=$(usex !cblas)
+		-DBUILD_SHARED_LIBS=$(usex !static)
 	)
 
 	cmake-utils_src_configure
@@ -36,11 +37,13 @@ src_configure() {
 src_install() {
 	cmake-utils_src_install
 
-	insinto /etc/env.d/blas/$(get_libdir)
-	newins "${FILESDIR}/openblas.blas.eselect.envd" "openblas"
+	if $(use static); then BUILD_TYPE="static"; else BUILD_TYPE="shared"; fi
 
-	if $(use cblas);  then
+	insinto /etc/env.d/blas/$(get_libdir)
+	newins "${FILESDIR}/openblas.${BUILD_TYPE}.blas.eselect.envd" "openblas"
+
+	if $(use cblas); then
 		insinto /etc/env.d/cblas/$(get_libdir)
-		newins "${FILESDIR}/openblas.cblas.eselect.envd" "openblas"
+		newins "${FILESDIR}/openblas.${BUILD_TYPE}.cblas.eselect.envd" "openblas"
 	fi
 }
