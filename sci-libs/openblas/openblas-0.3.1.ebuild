@@ -2,7 +2,7 @@
 
 EAPI=6
 
-inherit cmake-utils
+inherit fortran-2
 
 MY_PN="OpenBLAS"
 MY_P="${MY_PN}-${PV}"
@@ -13,29 +13,36 @@ SRC_URI="https://github.com/xianyi/OpenBLAS/archive/v${PV}.tar.gz"
 LICENSE="BSD-3"
 SLOT="0"
 KEYWORDS="*"
-IUSE="+cblas static"
+IUSE="+cblas openmp static"
 
-DEPEND="dev-util/cmake"
+DEPEND="
+	openmp? ( ||
+				( sys-devel/gcc[openmp] )
+				( sys-libs/libomp )
+			)"
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/${MY_P}"
 
 src_test() {
 	# Run all tests
-	emake tests lapack-test blas-test
+	emake USE_OPENMP=$(use openmp) tests lapack-test blas-test
 }
 
-src_configure() {
-	local mycmakeargs=(
-		-DBUILD_WITHOUT_CBLAS=$(usex !cblas)
-		-DBUILD_SHARED_LIBS=$(usex !static)
+src_compile() {
+	local mymakeargs=(
+		USE_OPENMP=$(use openmp)
+		BUILD_WITHOUT_CBLAS=$(use !cblas)
+		BUILD_SHARED_LIBS=$(use !static)
 	)
-
-	cmake-utils_src_configure
+	emake $mymakeargs
 }
 
 src_install() {
-	cmake-utils_src_install
+	emake "PREFIX=${ED}/usr" install
+	einstalldocs
+
+	mv "${ED}/usr/lib" "${ED}/usr/$(get_libdir)"
 
 	if $(use static); then BUILD_TYPE="static"; else BUILD_TYPE="shared"; fi
 
