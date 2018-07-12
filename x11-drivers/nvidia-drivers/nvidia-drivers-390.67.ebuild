@@ -29,10 +29,6 @@ EMULTILIB_PKG="true"
 NV_PKG_USE="+opengl +egl +gpgpu +nvpd +nvifr +nvfbc +nvcuvid +nvml +encodeapi +vdpau +xutils +xdriver"
 IUSE="+glvnd system-glvnd ${NV_PKG_USE} acpi compat +driver gtk3 kernel_FreeBSD kernel_linux +kms multilib pax_kernel static-libs +tools uvm wayland +X"
 
-REQUIRED_USE="
-	tools? ( X )
-"
-
 COMMON="
 	gpgpu? (
 			app-eselect/eselect-opencl
@@ -43,6 +39,7 @@ COMMON="
 		>=app-eselect/eselect-opengl-1.0.9
 		app-misc/pax-utils
 	)
+	driver? ( =x11-drivers/nvidia-drivers-kernel-${PV} )
 "
 DEPEND="
 	${COMMON}
@@ -361,100 +358,14 @@ pkg_setup() {
 src_install() {
 	nv_parse_manifest
 
-	dodir "${NV_ROOT}/src/${P}-kmod"
-	(set +f; cp -r "${NV_KMOD_SRC}"/* "${D}${NV_ROOT}/src/${P}-kmod" || return 1 ) || die "Could not copy kernel module sources!"
-
-	if use driver && use kernel_linux; then
-		linux-mod_src_install
-
-		# Add the aliases
-		# This file is tweaked with the appropriate video group in
-		# pkg_preinst, see bug #491414
-		insinto /etc/modprobe.d
-		newins "${FILESDIR}"/nvidia-169.07 nvidia.conf
-		doins "${FILESDIR}"/nvidia-rmmod.conf
-
-		# Ensures that our device nodes are created when not using X
-		exeinto "$(get_udevdir)"
-		newexe "${FILESDIR}"/nvidia-udev.sh-r1 nvidia-udev.sh
-		udev_newrules "${FILESDIR}"/nvidia.udev-rule 99-nvidia.rules
-	elif use kernel_FreeBSD; then
-		if use x86-fbsd; then
-			insinto /boot/modules
-			doins "${S}/src/nvidia.kld"
-		fi
-
-		exeinto /boot/modules
-		doexe "${S}/src/nvidia.ko"
-	fi
-
-	# if use wayland; then
-		# insinto /usr/share/egl/egl_external_platform.d
-		# doins ${NV_X11}/10_nvidia_wayland.json
-	# fi
-
-	# Documentation
-	#if use kernel_FreeBSD; then
-		#dodoc "${NV_DOC}/README"
-		#use X && doman "${NV_MAN}"/nvidia-xconfig.1
-		#use tools && doman "${NV_MAN}"/nvidia-settings.1
-	#else
-		# Docs
-		#newdoc "${NV_DOC}/README.txt" README
-		#dodoc "${NV_DOC}/NVIDIA_Changelog"
-		#doman "${NV_MAN}"/nvidia-smi.1
-		#use X && doman "${NV_MAN}"/nvidia-xconfig.1
-		#use tools && doman "${NV_MAN}"/nvidia-settings.1
-		#doman "${NV_MAN}"/nvidia-cuda-mps-control.1
-	#fi
-
-	docinto html
-	#dodoc -r ${NV_DOC}/html/*
-
 	# Helper Apps
 	exeinto ${NV_ROOT}/bin/
 
-	# if use X; then
-		#doexe ${NV_OBJ}/nvidia-xconfig
-
-	#	insinto /etc/vulkan/icd.d
-	#	doins nvidia_icd.json
-	# fi
-
 	if use kernel_linux; then
-		#doexe ${NV_OBJ}/nvidia-cuda-mps-control
-		#doexe ${NV_OBJ}/nvidia-cuda-mps-server
-		#doexe ${NV_OBJ}/nvidia-debugdump
-		#doexe ${NV_OBJ}/nvidia-persistenced
-		#doexe ${NV_OBJ}/nvidia-smi
-
-		#doman nvidia-cuda-mps-control.1
-		#doman nvidia-persistenced.1
 		newinitd "${FILESDIR}/nvidia-smi.init" nvidia-smi
 		newconfd "${FILESDIR}/nvidia-persistenced.conf" nvidia-persistenced
 		newinitd "${FILESDIR}/nvidia-persistenced.init" nvidia-persistenced
 	fi
-
-	# if use tools; then
-		# insinto /usr/share/nvidia/
-		# doins nvidia-application-profiles-${PV}-key-documentation
-
-		# insinto /etc/nvidia
-		# newins \
-		#	nvidia-application-profiles-${PV}-rc nvidia-application-profiles-rc
-
-		# There is no icon in the FreeBSD tarball.
-		# use kernel_FreeBSD || \
-		#	doicon ${NV_OBJ}/nvidia-settings.png
-
-		# domenu "${FILESDIR}"/nvidia-settings.desktop
-
-		# exeinto /etc/X11/xinit/xinitrc.d
-		# newexe "${FILESDIR}"/95-nvidia-settings-r1 95-nvidia-settings
-	# fi
-
-	# dobin ${NV_OBJ}/nvidia-bug-report.sh
-
 
 	is_final_abi || die "failed to iterate through all ABIs"
 
