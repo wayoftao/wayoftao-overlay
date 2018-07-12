@@ -249,9 +249,9 @@ nv_parse_manifest() {
 			GLX_CLIENT_SYMLINK|EGL_CLIENT_SYMLINK) _nv_glvnd "$f6" && nv_symlink_lib_arch "${NV_OPENGL_VEND_DIR}/lib" "$name" "$f4" "$f5" "$f7" ;;
 
 			#<libname> <perms> <type> <subdir> MODULE:<module>
-			#<libname> <perms> X_MODULE_SHARED_LIB <subdir> MODULE:<module>
+			#<libname> <perms> XMODULE_SHARED_LIB <subdir> MODULE:<module>
 			#<libname> <perms> GLX_MODULE_SHARED_LIB <subdir> MODULE:<module>
-			XMODULE_SHARED_LIB) nv_install "$(get_libdir)/${NV_X_MODDIR}/${f4%/}" "$name" "$perms" "$f5";;
+			XMODULE_SHARED_LIB) nvinstall "$(get_libdir)/${NV_X_MODDIR}/${f4%/}" "$name" "$perms" "$f5";;
 			GLX_MODULE_SHARED_LIB) nv_install "$(get_libdir)/${NV_OPENGL_VEND_DIR}/${f4%/}" "$name" "$perms" "$f5" ;;
 
 			#<libname-tgt> <perms> <type> <subdir> <libname-src> MODULE:<module>
