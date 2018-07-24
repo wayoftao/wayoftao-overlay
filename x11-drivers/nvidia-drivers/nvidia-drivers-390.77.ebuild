@@ -251,7 +251,7 @@ nv_parse_manifest() {
 			#<libname> <perms> <type> <subdir> MODULE:<module>
 			#<libname> <perms> XMODULE_SHARED_LIB <subdir> MODULE:<module>
 			#<libname> <perms> GLX_MODULE_SHARED_LIB <subdir> MODULE:<module>
-			XMODULE_SHARED_LIB) nvinstall "$(get_libdir)/${NV_X_MODDIR}/${f4%/}" "$name" "$perms" "$f5";;
+			XMODULE_SHARED_LIB) nv_install "$(get_libdir)/${NV_X_MODDIR}/${f4%/}" "$name" "$perms" "$f5";;
 			GLX_MODULE_SHARED_LIB) nv_install "$(get_libdir)/${NV_OPENGL_VEND_DIR}/${f4%/}" "$name" "$perms" "$f5" ;;
 
 			#<libname-tgt> <perms> <type> <subdir> <libname-src> MODULE:<module>
