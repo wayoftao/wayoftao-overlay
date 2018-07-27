@@ -6,25 +6,21 @@ LANGS="cs cy da de el el_GR en en_GB eo es eu fa_IR fi fr gl he hi hu it ja ko l
 
 QT_MINIMAL="4.6"
 
-EGIT_REPO_URI="https://github.com/mumble-voip/mumble"
-EGIT_SUBMODULES=(celt-0.7.0-src celt-0.11.0-src themes/Mumble)
 
 inherit eutils multilib qmake-utils virtualx git-r3
 
 DESCRIPTION="Mumble is an open source, low-latency, high quality voice chat software"
 HOMEPAGE="http://mumble.info/"
+EGIT_REPO_URI="https://github.com/mumble-voip/mumble"
+EGIT_SUBMODULES=( celt-0.7.0-src celt-0.11.0-src 3rdparty/rnnoise-src themes/Mumble )
 
 LICENSE="BSD MIT"
 SLOT="0"
 KEYWORDS=""
-IUSE="+alsa +dbus debug g15 libressl oss pch portaudio pulseaudio qt4 +qt5 speech zeroconf"
-
-REQUIRED_USE="
-	^^ ( qt4 qt5 )
-"
+IUSE="+alsa +dbus debug g15 libressl oss pch portaudio pulseaudio +qt5 speech zeroconf"
 
 RDEPEND="
-	qt4? (
+	!qt5? (
 		>=dev-qt/qtcore-4.6:4
 		>=dev-qt/qtgui-4.6:4
 		>=dev-qt/qtopengl-4.6:4
@@ -107,16 +103,16 @@ src_configure() {
 	conf_add+=" no-server"
 	conf_add+=" no-update"
 
-	if use qt4; then
-		export QT_SELECT=qt4
-		eqmake4 "${S}/main.pro" ${myconf} || die "eqmake4 failed"
-	elif use qt5; then
+	if use qt5; then
 		export QT_SELECT=qt5
 		ewarn "Please note that Qt5 support is still experimental."
 		ewarn "If you find anything to not work with Qt5, please report a bug."
 		eqmake5 "${S}/main.pro" -recursive \
 			CONFIG+="${conf_add}" \
 			DEFINES+="PLUGIN_PATH=/usr/$(get_libdir)/mumble" || die "eqmake5 failed"
+	else
+		export QT_SELECT=qt4
+		eqmake4 "${S}/main.pro" ${myconf} || die "eqmake4 failed"
 	fi
 }
 
