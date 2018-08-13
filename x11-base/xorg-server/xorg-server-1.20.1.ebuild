@@ -14,7 +14,7 @@ if [[ ${PV} != 9999* ]]; then
 fi
 
 IUSE_SERVERS="dmx kdrive wayland xephyr xnest xorg xvfb"
-IUSE="${IUSE_SERVERS} debug +glamor ipv6 libressl minimal selinux +udev unwind xcsecurity"
+IUSE="${IUSE_SERVERS} debug +glamor glvnd ipv6 libressl minimal selinux +udev unwind xcsecurity"
 
 CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	!libressl? ( dev-libs/openssl:0= )
@@ -92,6 +92,7 @@ DEPEND="${CDEPEND}
 	)"
 
 RDEPEND="${CDEPEND}
+	glvnd? ( media-libs/libglvnd )
 	selinux? ( sec-policy/selinux-xserver )
 	!x11-drivers/xf86-video-modesetting
 "
@@ -104,16 +105,6 @@ REQUIRED_USE="!minimal? (
 	)
 	xephyr? ( kdrive )"
 
-UPSTREAMED_PATCHES=(
-)
-
-PATCHES=(
-	"${UPSTREAMED_PATCHES[@]}"
-	"${FILESDIR}"/${PN}-1.12-unloadsubmodule.patch
-	# needed for new eselect-opengl, bug #541232
-	"${FILESDIR}"/${PN}-1.18-support-multiple-Files-sections.patch
-)
-
 pkg_pretend() {
 	# older gcc is not supported
 	[[ "${MERGE_TYPE}" != "binary" && $(gcc-major-version) -lt 4 ]] && \
@@ -125,6 +116,15 @@ pkg_setup() {
 		ewarn "glamor is necessary for acceleration under Xwayland."
 		ewarn "Performance may be unacceptable without it."
 	fi
+}
+
+src_prepare() {
+	epatch "${FILESDIR}"/${PN}-1.12-unloadsubmodule.patch
+	# needed for new eselect-opengl, bug #541232
+	epatch "${FILESDIR}"/${PN}-1.18-support-multiple-Files-sections.patch
+	use glvnd && epatch "${FILESDIR}/${PN}-glvnd-compat.patch"
+	eautoreconf
+	default
 }
 
 src_configure() {
