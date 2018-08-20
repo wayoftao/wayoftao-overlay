@@ -39,7 +39,7 @@ COMMON="
 		>=app-eselect/eselect-opengl-1.0.9
 		app-misc/pax-utils
 	)
-	driver? ( =x11-drivers/nvidia-drivers-kernel-${PV} )
+	driver? ( x11-drivers/nvidia-drivers-kernel:= )
 "
 DEPEND="
 	${COMMON}
